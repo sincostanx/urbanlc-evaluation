@@ -1,0 +1,62 @@
+architecture: "Unet"
+
+model_params:
+  encoder_name: "resnet50"
+  encoder_weights: "swsl"
+  in_channels: 11
+  classes: 11
+
+device: "cuda"
+seed: 0
+save_path: "./checkpoints/"
+
+training:
+  dataloader_params:
+    landsat:
+      root: "./Megacity2035/train"
+      filename_glob: "**/landsat8_2021.tif"
+      exclude: null
+    esa:
+      root: "./Megacity2035/train"
+      filename_glob: "**/ESAv200_.tif"
+      exclude: null
+    sensor_type: "OLITIRS"
+    tile_per_loader: 24
+    length: 50000
+    batch_size: 128
+    num_workers: 8
+
+  trainer_params:
+    epoch: 100
+    gradient_accumulation_factor: null
+
+    loss_fn_params:
+      weights: [1.0, 1.0]
+      FocalLoss:
+        mode: "multiclass"
+        alpha: null
+        gamma: 2.0
+        normalized: False
+      TverskyLoss:
+        mode: "multiclass"
+        alpha: 0.3
+        beta: 0.7
+        gamma: 2.0
+
+    optimizer_params:
+      lr: 5.0e-4
+      weight_decay: 1.0e-5
+
+    scheduler_params:
+      step_size: 30
+      gamma: 0.5
+      last_epoch: -1
+
+  validate_params:
+    root: "./Megacity2035/val"
+    img_glob: "**/landsat8_2021.tif"
+    gt_glob: "**/ESAv200_.tif"
+
+  logger_params:
+    PROJECT: "GUC_master"
+    NAME: "dummy"

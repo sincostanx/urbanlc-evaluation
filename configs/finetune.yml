@@ -1,0 +1,62 @@
+architecture: "Unet"
+
+model_params:
+  encoder_name: "resnet50"
+  encoder_weights: "swsl"
+  in_channels: 11
+  classes: 11
+
+device: "cuda"
+seed: 0
+save_path: "./checkpoints/finetune_fukuoka"
+
+training:
+  dataloader_params:
+    landsat:
+      root: "./finetune-data-LS8"
+      filename_glob: "**/landsat8_2021.tif"
+      exclude: null
+    esa:
+      root: "./finetune-data-LS8"
+      filename_glob: "**/ESAv200_.tif"
+      exclude: null
+    sensor_type: "OLITIRS"
+    tile_per_loader: 1
+    length: 120
+    batch_size: 8
+    num_workers: 1
+
+  trainer_params:
+    epoch: 50
+    gradient_accumulation_factor: null
+
+    loss_fn_params:
+      weights: [1.0, 1.0]
+      FocalLoss:
+        mode: "multiclass"
+        alpha: null
+        gamma: 2.0
+        normalized: False
+      TverskyLoss:
+        mode: "multiclass"
+        alpha: 0.3
+        beta: 0.7
+        gamma: 2.0
+
+    optimizer_params:
+      lr: 1.0e-5
+      weight_decay: 0
+
+    scheduler_params:
+      step_size: 100
+      gamma: 0.5
+      last_epoch: -1
+
+  validate_params:
+    root: "./finetune-data-LS8"
+    img_glob: "**/landsat8_2021.tif"
+    gt_glob: "**/ESAv200_.tif"
+
+  logger_params:
+    PROJECT: "GUC_master"
+    NAME: "finetune-fukuoka"

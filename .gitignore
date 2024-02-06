@@ -1,3 +1,18 @@
+# custom
+wandb
+finetune-data-LS8
+backup_*
+checkpoints
+logs*
+outputs*
+pretrained_models
+results
+temp*
+train_data
+val_data
+debug*
+*.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
